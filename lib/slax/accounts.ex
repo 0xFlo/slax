@@ -8,6 +8,10 @@ defmodule Slax.Accounts do
 
   alias Slax.Accounts.{User, UserToken, UserNotifier}
 
+  def list_users do
+    Repo.all(User)
+  end
+
   ## Database getters
 
   @doc """
@@ -94,6 +98,37 @@ defmodule Slax.Accounts do
   end
 
   ## Settings
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for changing the user username.
+
+  ## Examples
+
+      iex> change_user_username(user)
+      %Ecto.Changeset{data: %User{}}
+
+  """
+  def change_user_username(user, attrs \\ %{}) do
+    User.username_changeset(user, attrs)
+  end
+
+  @doc """
+  Updates the user username.
+
+  ## Examples
+
+      iex> update_user_username(user, %{username: "new_username"})
+      {:ok, %User{}}
+
+      iex> update_user_username(user, %{username: ""})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_username(user, attrs) do
+    user
+    |> User.username_changeset(attrs)
+    |> Repo.update()
+  end
 
   @doc """
   Returns an `%Ecto.Changeset{}` for changing the user email.

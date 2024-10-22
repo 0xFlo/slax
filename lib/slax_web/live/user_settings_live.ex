@@ -7,10 +7,23 @@ defmodule SlaxWeb.UserSettingsLive do
     ~H"""
     <.header class="text-center">
       Account Settings
-      <:subtitle>Manage your account email address and password settings</:subtitle>
+      <:subtitle>Manage your account email address, username, and password settings</:subtitle>
     </.header>
 
     <div class="space-y-12 divide-y">
+      <div>
+        <.simple_form
+          for={@username_form}
+          id="username_form"
+          phx-submit="update_username"
+          phx-change="validate_username"
+        >
+          <.input field={@username_form[:username]} type="text" label="Username" required />
+          <:actions>
+            <.button phx-disable-with="Changing...">Change Username</.button>
+          </:actions>
+        </.simple_form>
+      </div>
       <div>
         <.simple_form
           for={@email_form}
@@ -90,6 +103,7 @@ defmodule SlaxWeb.UserSettingsLive do
     user = socket.assigns.current_user
     email_changeset = Accounts.change_user_email(user)
     password_changeset = Accounts.change_user_password(user)
+    username_changeset = Accounts.change_user_username(user)
 
     socket =
       socket
@@ -98,6 +112,8 @@ defmodule SlaxWeb.UserSettingsLive do
       |> assign(:current_email, user.email)
       |> assign(:email_form, to_form(email_changeset))
       |> assign(:password_form, to_form(password_changeset))
+      # Assign the new form
+      |> assign(:username_form, to_form(username_changeset))
       |> assign(:trigger_submit, false)
 
     {:ok, socket}
@@ -162,6 +178,35 @@ defmodule SlaxWeb.UserSettingsLive do
 
       {:error, changeset} ->
         {:noreply, assign(socket, password_form: to_form(changeset))}
+    end
+  end
+
+  def handle_event("validate_username", %{"user" => user_params}, socket) do
+    # Fetch the current user from the socket.
+    user = socket.assigns.current_user
+
+    # Create a changeset for the username validation.
+    username_changeset =
+      user
+      |> Accounts.change_user_username(user_params)
+      |> Map.put(:action, :validate)
+
+    # Convert the changeset to a form and assign it back to the socket.
+    {:noreply, assign(socket, username_form: to_form(username_changeset))}
+  end
+
+  def handle_event("update_username", %{"user" => user_params}, socket) do
+    user = socket.assigns.current_user
+
+    # Attempt to update the user's username.
+    case Accounts.update_user_username(user, user_params) do
+      {:ok, _updated_user} ->
+        # If successful, display a success message.
+        {:noreply, put_flash(socket, :info, "Username updated successfully.")}
+
+      {:error, changeset} ->
+        # If there is an error (like uniqueness constraint), assign the changeset back to the form.
+        {:noreply, assign(socket, username_form: to_form(changeset))}
     end
   end
 end
