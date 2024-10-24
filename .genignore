@@ -33,3 +33,10 @@ assets/vendor/
 priv/repo/migrations/
 priv/repo/seeds.exs
 priv/repo/structure.sql
+
+# Additional files and directories to exclude
+lib/slax/accounts/user_notifier.ex
+lib/slax/mailer.ex
+lib/slax_web/page_html/home.html.heex
+lib/slax_web/telemetry.ex
+slax_test
