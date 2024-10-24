@@ -29,7 +29,7 @@ defmodule SlaxWeb.Router do
     live_session :profiles,
       on_mount: [{SlaxWeb.UserAuth, :mount_current_user}] do
       live "/profiles", UserListLive, :index
-      live "/profiles/:username", ProfileLive, :show
+      live "/profiles/:username", Profiles.ProfileLive, :show
     end
   end
 
@@ -44,7 +44,7 @@ defmodule SlaxWeb.Router do
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
 
       # Profile editing - requires authentication
-      live "/profiles/:username/edit", ProfileSettingsLive, :edit
+      live "/profiles/:username/edit", Profiles.ProfileSettingsLive, :edit
     end
   end
 
