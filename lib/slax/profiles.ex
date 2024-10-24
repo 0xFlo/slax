@@ -25,12 +25,16 @@ defmodule Slax.Profiles do
   def ensure_profile_exists(%User{} = user) do
     case Repo.get_by(Profile, user_id: user.id) do
       nil ->
-        %Profile{}
-        |> Profile.changeset(%{user_id: user.id})
-        |> Repo.insert()
+        create_profile(user)
 
       profile ->
         {:ok, profile}
     end
+  end
+
+  def create_profile(%User{} = user) do
+    %Profile{}
+    |> Profile.changeset(%{user_id: user.id})
+    |> Repo.insert()
   end
 end

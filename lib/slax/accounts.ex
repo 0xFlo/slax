@@ -31,6 +31,15 @@ defmodule Slax.Accounts do
     %User{}
     |> User.registration_changeset(attrs)
     |> Repo.insert()
+    |> case do
+      {:ok, user} = result ->
+        # Trigger profile creation after successful registration
+        {:ok, _profile} = Slax.Profiles.ensure_profile_exists(user)
+        result
+
+      error ->
+        error
+    end
   end
 
   def change_user_registration(%User{} = user, attrs \\ %{}) do
