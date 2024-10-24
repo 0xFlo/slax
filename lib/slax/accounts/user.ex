@@ -11,9 +11,10 @@ defmodule Slax.Accounts.User do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
-    field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
-    has_one :profile, Slax.Profiles.Profile
+    field :bio, :string
+    field :location, :string
+    field :website, :string
 
     timestamps(type: :utc_datetime)
   end
@@ -27,8 +28,26 @@ defmodule Slax.Accounts.User do
     |> validate_password(opts)
   end
 
-  def create_profile_changeset(user) do
-    Ecto.build_assoc(user, :profile, %{})
+  def profile_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:bio, :location, :website])
+    |> validate_length(:bio, max: 500)
+    |> validate_length(:location, max: 100)
+    |> validate_length(:website, max: 255)
+    |> validate_website_format()
+  end
+
+  defp validate_website_format(changeset) do
+    validate_change(changeset, :website, fn :website, website ->
+      if is_nil(website) || website == "" do
+        []
+      else
+        case URI.parse(website) do
+          %URI{scheme: scheme, host: host} when not is_nil(scheme) and not is_nil(host) -> []
+          _ -> [website: "must be a valid URL"]
+        end
+      end
+    end)
   end
 
   def username_changeset(user, attrs) do

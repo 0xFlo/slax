@@ -25,6 +25,16 @@ defmodule Slax.Accounts do
 
   def get_user!(id), do: Repo.get!(User, id)
 
+  def get_user_by_username(username) when is_binary(username) do
+    Repo.get_by(User, username: username)
+  end
+
+  def update_user_profile(%User{} = user, attrs) do
+    user
+    |> User.profile_changeset(attrs)
+    |> Repo.update()
+  end
+
   ## User registration
 
   def register_user(attrs) do

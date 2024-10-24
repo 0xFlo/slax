@@ -1,6 +1,23 @@
+# lib/slax_web/live/profiles/profile_live.ex
 defmodule SlaxWeb.Profiles.ProfileLive do
   use SlaxWeb, :live_view
-  alias Slax.Profiles
+  alias Slax.Accounts
+
+  def mount(%{"username" => username}, _session, socket) do
+    user = Accounts.get_user_by_username(username)
+
+    if user do
+      {:ok,
+       socket
+       |> assign(:page_title, "@#{user.username}")
+       |> assign(:user, user)}
+    else
+      {:ok,
+       socket
+       |> assign(:page_title, "Profile Not Found")
+       |> assign(:user, nil)}
+    end
+  end
 
   def render(assigns) do
     ~H"""
@@ -21,39 +38,35 @@ defmodule SlaxWeb.Profiles.ProfileLive do
             </div>
           </div>
 
-          <%= if profile = @user.profile do %>
-            <div class="space-y-4">
-              <%= if profile.bio && profile.bio != "" do %>
-                <div>
-                  <h2 class="text-sm font-semibold text-gray-500 mb-1">Bio</h2>
-                  <p class="text-gray-800"><%= profile.bio %></p>
-                </div>
-              <% end %>
+          <div class="space-y-4">
+            <%= if @user.bio && @user.bio != "" do %>
+              <div>
+                <h2 class="text-sm font-semibold text-gray-500 mb-1">Bio</h2>
+                <p class="text-gray-800"><%= @user.bio %></p>
+              </div>
+            <% end %>
 
-              <%= if profile.location && profile.location != "" do %>
-                <div>
-                  <h2 class="text-sm font-semibold text-gray-500 mb-1">Location</h2>
-                  <p class="text-gray-800"><%= profile.location %></p>
-                </div>
-              <% end %>
+            <%= if @user.location && @user.location != "" do %>
+              <div>
+                <h2 class="text-sm font-semibold text-gray-500 mb-1">Location</h2>
+                <p class="text-gray-800"><%= @user.location %></p>
+              </div>
+            <% end %>
 
-              <%= if profile.website && profile.website != "" do %>
-                <div>
-                  <h2 class="text-sm font-semibold text-gray-500 mb-1">Website</h2>
-                  <a
-                    href={profile.website}
-                    class="text-blue-600 hover:underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <%= profile.website %>
-                  </a>
-                </div>
-              <% end %>
-            </div>
-          <% else %>
-            <p class="text-gray-500 italic">Profile not found.</p>
-          <% end %>
+            <%= if @user.website && @user.website != "" do %>
+              <div>
+                <h2 class="text-sm font-semibold text-gray-500 mb-1">Website</h2>
+                <a
+                  href={@user.website}
+                  class="text-blue-600 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <%= @user.website %>
+                </a>
+              </div>
+            <% end %>
+          </div>
         </div>
       <% else %>
         <div class="bg-white shadow rounded-lg p-6 text-center">
@@ -62,21 +75,5 @@ defmodule SlaxWeb.Profiles.ProfileLive do
       <% end %>
     </div>
     """
-  end
-
-  def mount(%{"username" => username}, _session, socket) do
-    user = Profiles.get_profile_by_username(username)
-
-    if user do
-      {:ok,
-       socket
-       |> assign(:page_title, "@#{user.username}")
-       |> assign(:user, user)}
-    else
-      {:ok,
-       socket
-       |> assign(:page_title, "Profile Not Found")
-       |> assign(:user, nil)}
-    end
   end
 end
