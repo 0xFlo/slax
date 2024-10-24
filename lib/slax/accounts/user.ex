@@ -7,11 +7,13 @@ defmodule Slax.Accounts.User do
   @hash_opts [hash_password: true, validate_email: true]
 
   schema "users" do
-    field :username, :string
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
+
+    # Profile fields
+    field :username, :string
     field :bio, :string
     field :location, :string
     field :website, :string

@@ -1,6 +1,7 @@
 defmodule SlaxWeb.Profiles.ProfileSettingsLive do
   use SlaxWeb, :live_view
   alias Slax.Accounts
+  alias Slax.Accounts.User
 
   def mount(%{"username" => username}, _session, socket) do
     case Accounts.get_user_by_username(username) do
