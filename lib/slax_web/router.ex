@@ -23,6 +23,7 @@ defmodule SlaxWeb.Router do
     live "/", ChatRoomLive
     live "/rooms/:id", ChatRoomLive
     live "/rooms/:id/edit", ChatRoomLive.Edit
+    live "/profiles/:username", ProfileLive, :show
 
     live "/accounts", UserListLive, :index
   end
@@ -49,6 +50,7 @@ defmodule SlaxWeb.Router do
       live "/users/log_in", UserLoginLive, :new
       live "/users/reset_password", UserForgotPasswordLive, :new
       live "/users/reset_password/:token", UserResetPasswordLive, :edit
+      live "/profile/edit", ProfileSettingsLive, :edit
     end
 
     post "/users/log_in", UserSessionController, :create

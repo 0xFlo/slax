@@ -7,7 +7,6 @@ defmodule Slax.Accounts.Profile do
     field :bio, :string
     field :location, :string
     field :website, :string
-    field :display_name, :string
     belongs_to :user, User
 
     timestamps(type: :utc_datetime)
@@ -15,12 +14,11 @@ defmodule Slax.Accounts.Profile do
 
   def changeset(profile, attrs) do
     profile
-    |> cast(attrs, [:bio, :location, :website, :display_name])
+    |> cast(attrs, [:bio, :location, :website])
     |> validate_required([])
     |> validate_length(:bio, max: 500)
     |> validate_length(:location, max: 100)
     |> validate_length(:website, max: 255)
-    |> validate_length(:display_name, max: 50)
     |> validate_website_format()
   end
 
