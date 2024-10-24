@@ -9,7 +9,15 @@ defmodule SlaxWeb.ProfileLive do
         <div class="bg-white shadow rounded-lg p-6">
           <div class="flex items-center space-x-4 mb-6">
             <div class="flex-1">
-              <h1 class="text-xl font-bold">@<%= @user.username %></h1>
+              <h1 class="text-sm font-bold leading-none">
+                @<%= @user.username %>
+                <.link
+                  class="font-normal text-xs text-blue-600 hover:text-blue-700"
+                  navigate={~p"/profiles/#{@user.username}/edit"}
+                >
+                  Edit
+                </.link>
+              </h1>
             </div>
           </div>
 

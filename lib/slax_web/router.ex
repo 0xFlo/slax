@@ -24,8 +24,9 @@ defmodule SlaxWeb.Router do
     live "/rooms/:id", ChatRoomLive
     live "/rooms/:id/edit", ChatRoomLive.Edit
     live "/profiles/:username", ProfileLive, :show
+    live "/profiles/:username/edit", ProfileSettingsLive, :edit
 
-    live "/accounts", UserListLive, :index
+    live "/profiles", UserListLive, :index
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

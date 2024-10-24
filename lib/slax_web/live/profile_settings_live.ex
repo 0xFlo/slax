@@ -22,19 +22,30 @@ defmodule SlaxWeb.ProfileSettingsLive do
           </.button>
         </:actions>
       </.simple_form>
+
+      <.back navigate={~p"/profiles/#{@user.username}"}>Back to profile</.back>
     </div>
     """
   end
 
-  def mount(_params, _session, socket) do
-    user = socket.assigns.current_user
-    {:ok, profile} = Profiles.ensure_profile_exists(user)
+  def mount(%{"username" => username}, _session, socket) do
+    case Profiles.get_profile_by_username(username) do
+      nil ->
+        {:ok,
+         socket
+         |> put_flash(:error, "User not found")
+         |> push_navigate(to: ~p"/")}
 
-    {:ok,
-     socket
-     |> assign(:page_title, "Edit Profile")
-     |> assign(:profile, profile)
-     |> assign(:form, to_form(Profile.changeset(profile, %{})))}
+      user ->
+        {:ok, profile} = Profiles.ensure_profile_exists(user)
+
+        {:ok,
+         socket
+         |> assign(:page_title, "Edit Profile")
+         |> assign(:profile, profile)
+         |> assign(:user, user)
+         |> assign(:form, to_form(Profile.changeset(profile, %{})))}
+    end
   end
 
   def handle_event("validate", %{"profile" => profile_params}, socket) do
@@ -48,12 +59,12 @@ defmodule SlaxWeb.ProfileSettingsLive do
 
   def handle_event("save", %{"profile" => profile_params}, socket) do
     case Profiles.update_profile(socket.assigns.profile, profile_params) do
-      {:ok, profile} ->
+      # Add underscore since we're not using the variable
+      {:ok, _profile} ->
         {:noreply,
          socket
          |> put_flash(:info, "Profile updated successfully")
-         |> assign(:profile, profile)
-         |> assign(:form, to_form(Profile.changeset(profile, %{})))}
+         |> push_navigate(to: ~p"/profiles/#{socket.assigns.user.username}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :form, to_form(changeset))}

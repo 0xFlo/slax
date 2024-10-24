@@ -14,8 +14,8 @@ defmodule Slax.Accounts.Profile do
 
   def changeset(profile, attrs) do
     profile
-    |> cast(attrs, [:bio, :location, :website])
-    |> validate_required([])
+    |> cast(attrs, [:bio, :location, :website, :user_id])
+    |> validate_required([:user_id])
     |> validate_length(:bio, max: 500)
     |> validate_length(:location, max: 100)
     |> validate_length(:website, max: 255)
