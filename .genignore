@@ -9,12 +9,16 @@ telemetry.ex
 assets/
 priv/static/
 
-# Configuration files and directories
+# Configuration directories
 config/
 priv/gettext/
 priv/repo/
+
+# Test directories and files
 test/
 slax_test*
+
+# Database files
 *.db
 *.db-shm
 *.db-wal
@@ -25,7 +29,7 @@ assets/js/
 assets/tailwind.config.js
 assets/vendor/
 
-# Migrations and seeds (usually not needed for logic understanding)
+# Migrations and seeds
 priv/repo/migrations/
 priv/repo/seeds.exs
 priv/repo/structure.sql
