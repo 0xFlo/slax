@@ -13,6 +13,7 @@ defmodule Slax.Accounts.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
+    has_one :profile, Slax.Accounts.Profile
 
     timestamps(type: :utc_datetime)
   end
@@ -24,6 +25,10 @@ defmodule Slax.Accounts.User do
     |> validate_username()
     |> validate_email(opts)
     |> validate_password(opts)
+  end
+
+  def create_profile_changeset(user) do
+    Ecto.build_assoc(user, :profile, %{})
   end
 
   def username_changeset(user, attrs) do
