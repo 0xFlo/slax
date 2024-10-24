@@ -1,7 +1,11 @@
 defmodule Slax.Profiles do
+  @moduledoc """
+  The Profiles context.
+  """
+
   import Ecto.Query
   alias Slax.Repo
-  alias Slax.Accounts.{Profile, User}
+  alias Slax.Profiles.Profile
 
   def get_profile_by_username(username) when is_binary(username) do
     User

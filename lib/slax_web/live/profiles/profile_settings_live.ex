@@ -1,7 +1,7 @@
-defmodule SlaxWeb.ProfileSettingsLive do
+defmodule SlaxWeb.Profiles.ProfileSettingsLive do
   use SlaxWeb, :live_view
   alias Slax.Profiles
-  alias Slax.Accounts.Profile
+  alias Slax.Profiles.Profile
 
   def render(assigns) do
     ~H"""

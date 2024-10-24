@@ -1,4 +1,4 @@
-defmodule SlaxWeb.ProfileLive do
+defmodule SlaxWeb.Profiles.ProfileLive do
   use SlaxWeb, :live_view
   alias Slax.Profiles
 

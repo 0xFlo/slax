@@ -23,8 +23,8 @@ defmodule SlaxWeb.Router do
     live "/", ChatRoomLive
     live "/rooms/:id", ChatRoomLive
     live "/rooms/:id/edit", ChatRoomLive.Edit
-    live "/profiles/:username", ProfileLive, :show
-    live "/profiles/:username/edit", ProfileSettingsLive, :edit
+    live "/profiles/:username", Profiles.ProfileLive, :show
+    live "/profiles/:username/edit", Profiles.ProfileSettingsLive, :edit
 
     live "/profiles", UserListLive, :index
   end

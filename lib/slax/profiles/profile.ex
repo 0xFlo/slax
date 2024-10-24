@@ -1,4 +1,4 @@
-defmodule Slax.Accounts.Profile do
+defmodule Slax.Profiles.Profile do
   use Ecto.Schema
   import Ecto.Changeset
   alias Slax.Accounts.User
