@@ -50,7 +50,6 @@ defmodule SlaxWeb.Router do
       live "/users/log_in", UserLoginLive, :new
       live "/users/reset_password", UserForgotPasswordLive, :new
       live "/users/reset_password/:token", UserResetPasswordLive, :edit
-      live "/profile/edit", ProfileSettingsLive, :edit
     end
 
     post "/users/log_in", UserSessionController, :create
@@ -63,6 +62,8 @@ defmodule SlaxWeb.Router do
       on_mount: [{SlaxWeb.UserAuth, :ensure_authenticated}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+      # Moved here - requires authentication
+      live "/profile/edit", ProfileSettingsLive, :edit
     end
   end
 
