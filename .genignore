@@ -1,0 +1,31 @@
+# Configuration and environment files
+.formatter.exs
+.gitignore
+README.md
+mix.lock
+telemetry.ex
+
+# Assets and frontend files
+assets/
+priv/static/
+
+# Configuration files and directories
+config/
+priv/gettext/
+priv/repo/
+test/
+slax_test*
+*.db
+*.db-shm
+*.db-wal
+
+# Compiled assets and vendor files
+assets/css/
+assets/js/
+assets/tailwind.config.js
+assets/vendor/
+
+# Migrations and seeds (usually not needed for logic understanding)
+priv/repo/migrations/
+priv/repo/seeds.exs
+priv/repo/structure.sql
