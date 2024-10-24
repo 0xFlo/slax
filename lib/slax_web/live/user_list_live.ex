@@ -1,9 +1,16 @@
 defmodule SlaxWeb.UserListLive do
   use SlaxWeb, :live_view
-  alias Slax.Accounts
+
+  import Ecto.Query
+  alias Slax.Repo
+  alias Slax.Accounts.User
 
   def mount(_params, _session, socket) do
-    users = Accounts.list_users()
+    users =
+      from(u in User)
+      |> preload(:profile)
+      |> Repo.all()
+
     {:ok, assign(socket, users: users)}
   end
 
@@ -22,6 +29,13 @@ defmodule SlaxWeb.UserListLive do
           </.link>
         <% else %>
           <span class="text-gray-500">No username set</span>
+        <% end %>
+      </:col>
+      <:col :let={user} label="Profile">
+        <%= if user.profile do %>
+          <span class="text-green-600">✓</span>
+        <% else %>
+          <span class="text-gray-400">-</span>
         <% end %>
       </:col>
       <:col :let={user} label="Email"><%= user.email %></:col>

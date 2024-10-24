@@ -5,6 +5,7 @@ defmodule Slax.Profiles do
 
   import Ecto.Query
   alias Slax.Repo
+  alias Slax.Accounts.User
   alias Slax.Profiles.Profile
 
   def get_profile_by_username(username) when is_binary(username) do

@@ -17,31 +17,38 @@ defmodule SlaxWeb.Router do
     plug :accepts, ["json"]
   end
 
+  # Public routes
   scope "/", SlaxWeb do
     pipe_through :browser
 
     live "/", ChatRoomLive
     live "/rooms/:id", ChatRoomLive
     live "/rooms/:id/edit", ChatRoomLive.Edit
-    live "/profiles/:username", Profiles.ProfileLive, :show
-    live "/profiles/:username/edit", Profiles.ProfileSettingsLive, :edit
 
-    live "/profiles", UserListLive, :index
-  end
-
-  # Enable LiveDashboard and Swoosh mailbox preview in development
-  if Application.compile_env(:slax, :dev_routes) do
-    import Phoenix.LiveDashboard.Router
-
-    scope "/dev" do
-      pipe_through :browser
-
-      live_dashboard "/dashboard", metrics: SlaxWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
+    # Public profile routes with current_user context
+    live_session :profiles,
+      on_mount: [{SlaxWeb.UserAuth, :mount_current_user}] do
+      live "/profiles", UserListLive, :index
+      live "/profiles/:username", Profiles.ProfileLive, :show
     end
   end
 
-  ## Authentication routes
+  # Protected routes
+  scope "/", SlaxWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :require_authenticated_user,
+      on_mount: [{SlaxWeb.UserAuth, :ensure_authenticated}] do
+      # User settings
+      live "/users/settings", UserSettingsLive, :edit
+      live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+
+      # Profile editing - requires authentication
+      live "/profiles/:username/edit", Profiles.ProfileSettingsLive, :edit
+    end
+  end
+
+  # Authentication routes
   scope "/", SlaxWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
@@ -56,18 +63,7 @@ defmodule SlaxWeb.Router do
     post "/users/log_in", UserSessionController, :create
   end
 
-  scope "/", SlaxWeb do
-    pipe_through [:browser, :require_authenticated_user]
-
-    live_session :require_authenticated_user,
-      on_mount: [{SlaxWeb.UserAuth, :ensure_authenticated}] do
-      live "/users/settings", UserSettingsLive, :edit
-      live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
-      # Moved here - requires authentication
-      live "/profile/edit", ProfileSettingsLive, :edit
-    end
-  end
-
+  # Public authentication-related routes
   scope "/", SlaxWeb do
     pipe_through [:browser]
 
@@ -77,6 +73,18 @@ defmodule SlaxWeb.Router do
       on_mount: [{SlaxWeb.UserAuth, :mount_current_user}] do
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new
+    end
+  end
+
+  # Development routes
+  if Application.compile_env(:slax, :dev_routes) do
+    import Phoenix.LiveDashboard.Router
+
+    scope "/dev" do
+      pipe_through :browser
+
+      live_dashboard "/dashboard", metrics: SlaxWeb.Telemetry
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 end
