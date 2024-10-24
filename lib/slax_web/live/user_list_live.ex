@@ -21,6 +21,13 @@ defmodule SlaxWeb.UserListLive do
       <:col :let={user} label="ID"><%= user.id %></:col>
       <:col :let={user} label="Username">
         <%= if user.username do %>
+          <%= user.username %>
+        <% else %>
+          <span class="text-zinc-400 text-sm">Not set</span>
+        <% end %>
+      </:col>
+      <:col :let={user} label="Profile">
+        <%= if user.profile do %>
           <.link
             navigate={~p"/profiles/#{user.username}"}
             class="text-blue-600 hover:text-blue-700 hover:underline"
@@ -28,14 +35,12 @@ defmodule SlaxWeb.UserListLive do
             @<%= user.username %>
           </.link>
         <% else %>
-          <span class="text-gray-500">No username set</span>
-        <% end %>
-      </:col>
-      <:col :let={user} label="Profile">
-        <%= if user.profile do %>
-          <span class="text-green-600">✓</span>
-        <% else %>
-          <span class="text-gray-400">-</span>
+          <.link
+            navigate={~p"/profiles/#{user.username}/edit"}
+            class="text-zinc-500 hover:text-zinc-700 text-sm hover:underline"
+          >
+            → Create profile
+          </.link>
         <% end %>
       </:col>
       <:col :let={user} label="Email"><%= user.email %></:col>
