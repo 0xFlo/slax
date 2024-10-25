@@ -18,12 +18,19 @@ defmodule SlaxWeb.UserResetPasswordLive do
           Oops, something went wrong! Please check the errors below.
         </.error>
 
-        <.input field={@form[:password]} type="password" label="New password" required />
+        <.input
+          field={@form[:password]}
+          type="password"
+          label="New password"
+          required
+          phx-debounce="300"
+        />
         <.input
           field={@form[:password_confirmation]}
           type="password"
           label="Confirm new password"
           required
+          phx-debounce="300"
         />
         <:actions>
           <.button phx-disable-with="Resetting..." class="w-full">Reset Password</.button>

@@ -18,10 +18,13 @@ defmodule SlaxWeb.UserSettingsLive do
           phx-submit="update_username"
           phx-change="validate_username"
         >
-          <.input field={@username_form[:username]} type="text" label="Username" required />
-          <:actions>
-            <.button phx-disable-with="Changing...">Change Username</.button>
-          </:actions>
+          <.input
+            field={@username_form[:username]}
+            type="text"
+            label="Username"
+            required
+            phx-debounce="300"
+          />
         </.simple_form>
       </div>
       <div>
@@ -31,7 +34,7 @@ defmodule SlaxWeb.UserSettingsLive do
           phx-submit="update_email"
           phx-change="validate_email"
         >
-          <.input field={@email_form[:email]} type="email" label="Email" required />
+          <.input field={@email_form[:email]} type="email" label="Email" required phx-debounce="blur" />
           <.input
             field={@email_form[:current_password]}
             name="current_password"
