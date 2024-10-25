@@ -331,7 +331,13 @@ defmodule SlaxWeb.CoreComponents do
   def input(%{type: "select"} = assigns) do
     ~H"""
     <div>
-      <.label for={@id}><%= @label %></.label>
+      <div class="flex justify-between items-baseline gap-4">
+        <.label for={@id}><%= @label %></.label>
+        <div :if={@errors != []} class="flex items-center gap-1 text-sm leading-6 text-rose-600">
+          <.icon name="hero-exclamation-circle-mini" class="h-5 w-5 flex-none" />
+          <%= Enum.join(@errors, ", ") %>
+        </div>
+      </div>
       <select
         id={@id}
         name={@name}
@@ -342,7 +348,6 @@ defmodule SlaxWeb.CoreComponents do
         <option :if={@prompt} value=""><%= @prompt %></option>
         <%= Phoenix.HTML.Form.options_for_select(@options, @value) %>
       </select>
-      <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
   end
@@ -350,7 +355,13 @@ defmodule SlaxWeb.CoreComponents do
   def input(%{type: "textarea"} = assigns) do
     ~H"""
     <div>
-      <.label for={@id}><%= @label %></.label>
+      <div class="flex justify-between items-baseline gap-4">
+        <.label for={@id}><%= @label %></.label>
+        <div :if={@errors != []} class="flex items-center gap-1 text-sm leading-6 text-rose-600">
+          <.icon name="hero-exclamation-circle-mini" class="h-5 w-5 flex-none" />
+          <%= Enum.join(@errors, ", ") %>
+        </div>
+      </div>
       <textarea
         id={@id}
         name={@name}
@@ -361,7 +372,6 @@ defmodule SlaxWeb.CoreComponents do
         ]}
         {@rest}
       ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
-      <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
   end
@@ -370,7 +380,13 @@ defmodule SlaxWeb.CoreComponents do
   def input(assigns) do
     ~H"""
     <div>
-      <.label for={@id}><%= @label %></.label>
+      <div class="flex justify-between items-baseline gap-4">
+        <.label for={@id}><%= @label %></.label>
+        <div :if={@errors != []} class="flex items-center gap-1 text-sm leading-6 text-rose-600">
+          <.icon name="hero-exclamation-circle-mini" class="h-5 w-5 flex-none" />
+          <%= Enum.join(@errors, ", ") %>
+        </div>
+      </div>
       <input
         type={@type}
         name={@name}
@@ -383,7 +399,6 @@ defmodule SlaxWeb.CoreComponents do
         ]}
         {@rest}
       />
-      <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
   end

@@ -17,42 +17,50 @@ defmodule SlaxWeb.Router do
     plug :accepts, ["json"]
   end
 
-  # Public routes
+  # Unprotected routes that don't require authentication
   scope "/", SlaxWeb do
     pipe_through :browser
 
-    live "/", ChatRoomLive
-    live "/rooms/:id", ChatRoomLive
-    live "/rooms/:id/edit", ChatRoomLive.Edit
-
-    # Public profile routes with current_user context
-    live_session :profiles,
+    # Public profile viewing
+    live_session :public_profiles,
       on_mount: [{SlaxWeb.UserAuth, :mount_current_user}] do
       live "/profiles", UserListLive, :index
       live "/profiles/:username", Profiles.ProfileLive, :show
     end
+
+    # Account confirmation routes
+    live_session :account_confirmation,
+      on_mount: [{SlaxWeb.UserAuth, :mount_current_user}] do
+      live "/users/confirm/:token", UserConfirmationLive, :edit
+      live "/users/confirm", UserConfirmationInstructionsLive, :new
+    end
+
+    delete "/users/log_out", UserSessionController, :delete
   end
 
-  # Protected routes
+  # Routes that require authentication
   scope "/", SlaxWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    live_session :require_authenticated_user,
+    live_session :authenticated,
       on_mount: [{SlaxWeb.UserAuth, :ensure_authenticated}] do
-      # User settings
+      # Chat rooms - now protected
+      live "/", ChatRoomLive, :index
+      live "/rooms/:id", ChatRoomLive, :show
+      live "/rooms/:id/edit", ChatRoomLive.Edit, :edit
+
+      # User settings and profile management
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
-
-      # Profile editing - requires authentication
       live "/profiles/:username/edit", Profiles.ProfileSettingsLive, :edit
     end
   end
 
-  # Authentication routes
+  # Routes accessible only to non-authenticated users
   scope "/", SlaxWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
-    live_session :redirect_if_user_is_authenticated,
+    live_session :unauthenticated,
       on_mount: [{SlaxWeb.UserAuth, :redirect_if_user_is_authenticated}] do
       live "/users/register", UserRegistrationLive, :new
       live "/users/log_in", UserLoginLive, :new
@@ -63,20 +71,7 @@ defmodule SlaxWeb.Router do
     post "/users/log_in", UserSessionController, :create
   end
 
-  # Public authentication-related routes
-  scope "/", SlaxWeb do
-    pipe_through [:browser]
-
-    delete "/users/log_out", UserSessionController, :delete
-
-    live_session :current_user,
-      on_mount: [{SlaxWeb.UserAuth, :mount_current_user}] do
-      live "/users/confirm/:token", UserConfirmationLive, :edit
-      live "/users/confirm", UserConfirmationInstructionsLive, :new
-    end
-  end
-
-  # Development routes
+  # Development-only routes
   if Application.compile_env(:slax, :dev_routes) do
     import Phoenix.LiveDashboard.Router
 
