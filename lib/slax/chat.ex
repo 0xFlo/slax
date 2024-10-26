@@ -1,9 +1,19 @@
 # lib/slax/chat.ex
 defmodule Slax.Chat do
-  alias Slax.Chat.Room
+  alias Slax.Chat.{Message, Room}
   alias Slax.Repo
 
   import Ecto.Query
+
+  @doc """
+  Lists all messages in a given room, ordered by insertion time.
+  """
+  def list_messages_in_room(%Room{id: room_id}) do
+    Message
+    |> where([m], m.room_id == ^room_id)
+    |> order_by([m], asc: :inserted_at, asc: :id)
+    |> Repo.all()
+  end
 
   def get_first_room! do
     Repo.one!(from r in Room, limit: 1, order_by: [asc: :name])
