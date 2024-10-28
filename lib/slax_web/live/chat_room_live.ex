@@ -9,7 +9,12 @@ defmodule SlaxWeb.ChatRoomLive do
     ~H"""
     <div class="flex h-full">
       <.sidebar rooms={@rooms} current_room={@room} />
-      <.main_content room={@room} hide_topic?={@hide_topic?} messages={@messages} />
+      <.main_content
+        room={@room}
+        hide_topic?={@hide_topic?}
+        messages={@messages}
+        new_message_form={@new_message_form}
+      />
     </div>
     """
   end
@@ -40,6 +45,7 @@ defmodule SlaxWeb.ChatRoomLive do
   attr :room, Room, required: true
   attr :hide_topic?, :boolean, required: true
   attr :messages, :list, required: true
+  attr :new_message_form, :any, required: true
 
   defp main_content(assigns) do
     ~H"""
@@ -47,6 +53,28 @@ defmodule SlaxWeb.ChatRoomLive do
       <.room_header room={@room} hide_topic?={@hide_topic?} />
       <div class="flex flex-col flex-grow overflow-auto">
         <.message :for={message <- @messages} message={message} />
+      </div>
+      <div class="h-12 bg-white px-4 pb-4">
+        <.form
+          id="new-message-form"
+          for={@new_message_form}
+          phx-change="validate-message"
+          phx-submit="submit-message"
+          class="flex items-center border-2 border-slate-300 rounded-sm p-1"
+        >
+          <textarea
+            class="flex-grow text-sm px-3 border-l border-slate-300 mx-1 resize-none"
+            cols=""
+            id="chat-message-textarea"
+            name={@new_message_form[:body].name}
+            placeholder={"Message ##{@room.name}"}
+            phx-debounce
+            rows="1"
+          ><%= Phoenix.HTML.Form.normalize_value("textarea", @new_message_form[:body].value) %></textarea>
+          <button class="flex-shrink flex items-center justify-center h-6 w-6 rounded hover:bg-slate-200">
+            <.icon name="hero-paper-airplane" class="h-4 w-4" />
+          </button>
+        </.form>
       </div>
     </div>
     """
@@ -123,7 +151,11 @@ defmodule SlaxWeb.ChatRoomLive do
   # Mount function to initialize the rooms list
   def mount(_params, _session, socket) do
     rooms = Chat.list_rooms()
-    {:ok, assign(socket, rooms: rooms)}
+
+    {:ok,
+     socket
+     |> assign(rooms: rooms)
+     |> assign_message_form(Chat.change_message(%Message{}))}
   end
 
   # Handle route parameters to fetch the selected room and its messages
@@ -132,17 +164,46 @@ defmodule SlaxWeb.ChatRoomLive do
     messages = Chat.list_messages_in_room(room)
 
     {:noreply,
-     assign(socket,
+     socket
+     |> assign(
        hide_topic?: false,
        messages: messages,
        page_title: "#" <> room.name,
        room: room
-     )}
+     )
+     |> assign_message_form(Chat.change_message(%Message{}))}
+  end
+
+  defp assign_message_form(socket, changeset) do
+    assign(socket, :new_message_form, to_form(changeset))
+  end
+
+  def handle_event("submit-message", %{"message" => message_params}, socket) do
+    %{current_user: current_user, room: room} = socket.assigns
+
+    socket =
+      case Chat.create_message(room, message_params, current_user) do
+        {:ok, message} ->
+          socket
+          |> update(:messages, &(&1 ++ [message]))
+          |> assign_message_form(Chat.change_message(%Message{}))
+
+        {:error, changeset} ->
+          assign_message_form(socket, changeset)
+      end
+
+    {:noreply, socket}
   end
 
   # Handle toggling the topic visibility
   def handle_event("toggle-topic", _params, socket) do
     {:noreply, update(socket, :hide_topic?, &(!&1))}
+  end
+
+  # Add the validate-message event handler:
+  def handle_event("validate-message", %{"message" => message_params}, socket) do
+    changeset = Chat.change_message(%Message{}, message_params)
+    {:noreply, assign_message_form(socket, changeset)}
   end
 
   # Helper function to fetch the room by ID or get the first room

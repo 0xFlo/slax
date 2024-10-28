@@ -43,4 +43,14 @@ defmodule Slax.Chat do
     |> Room.changeset(attrs)
     |> Repo.update()
   end
+
+  def change_message(message, attrs \\ %{}) do
+    Message.changeset(message, attrs)
+  end
+
+  def create_message(room, attrs, user) do
+    %Message{room: room, user: user}
+    |> Message.changeset(attrs)
+    |> Repo.insert()
+  end
 end
