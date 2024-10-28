@@ -31,12 +31,24 @@ defmodule SlaxWeb.UserRegistrationLive do
           Oops, something went wrong! Please check the errors below.
         </.error>
 
-        <.input field={@form[:username]} type="text" label="Username" required phx-debounce="300" />
+        <div class="relative">
+          <.input field={@form[:username]} type="text" label="Username" required phx-debounce="300" />
+          <div
+            :if={@form[:username].value && @form[:username].errors == []}
+            class="absolute top-[2.4rem] right-2"
+          >
+            <.icon name="hero-check-circle-solid" class="w-5 h-5 text-green-500" />
+          </div>
+        </div>
+
         <.input field={@form[:email]} type="email" label="Email" required phx-debounce="blur" />
+
         <.input field={@form[:password]} type="password" label="Password" required />
 
         <:actions>
-          <.button phx-disable-with="Creating account..." class="w-full">Create an account</.button>
+          <.button phx-disable-with="Creating account..." class="w-full">
+            Create an account
+          </.button>
         </:actions>
       </.simple_form>
     </div>
