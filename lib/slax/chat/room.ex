@@ -8,6 +8,8 @@ defmodule Slax.Chat.Room do
     field :name, :string
     field :topic, :string
 
+    has_many :messages, Message
+
     timestamps(type: :utc_datetime)
   end
 
