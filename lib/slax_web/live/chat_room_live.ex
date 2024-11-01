@@ -25,7 +25,80 @@ defmodule SlaxWeb.ChatRoomLive do
     """
   end
 
-  # Sidebar component
+  def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(Slax.PubSub, "chat_rooms")
+    end
+
+    rooms = Chat.list_rooms()
+
+    {:ok,
+     socket
+     |> stream_configure(:messages, dom_id: &"message-#{&1.id}")
+     |> stream(:messages, [])
+     |> assign(rooms: rooms)
+     |> assign_message_form(Chat.change_message(%Message{}))}
+  end
+
+  def handle_params(params, _session, socket) do
+    if socket.assigns[:room], do: Chat.unsubscribe_from_room(socket.assigns.room)
+
+    room = fetch_room(params)
+    messages = Chat.list_messages_in_room(room)
+
+    Chat.subscribe_to_room(room)
+
+    {:noreply,
+     socket
+     |> assign(
+       hide_topic?: false,
+       page_title: "#" <> room.name,
+       room: room
+     )
+     |> stream(:messages, messages, reset: true)
+     |> assign_message_form(Chat.change_message(%Message{}))}
+  end
+
+  # Group all handle_event/3 clauses together
+  def handle_event("submit-message", %{"message" => message_params}, socket) do
+    %{current_user: current_user, room: room} = socket.assigns
+
+    socket =
+      case Chat.create_message(room, message_params, current_user) do
+        {:ok, _message} ->
+          assign_message_form(socket, Chat.change_message(%Message{}))
+
+        {:error, changeset} ->
+          assign_message_form(socket, changeset)
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_event("validate-message", %{"message" => message_params}, socket) do
+    changeset = Chat.change_message(%Message{}, message_params)
+    {:noreply, assign_message_form(socket, changeset)}
+  end
+
+  def handle_event("toggle-topic", _params, socket) do
+    {:noreply, update(socket, :hide_topic?, &(!&1))}
+  end
+
+  def handle_event("delete-message", %{"id" => id}, socket) do
+    Chat.delete_message_by_id(id, socket.assigns.current_user)
+    {:noreply, socket}
+  end
+
+  # Group all handle_info/2 clauses together
+  def handle_info({:new_message, message}, socket) do
+    {:noreply, stream_insert(socket, :messages, message)}
+  end
+
+  def handle_info({:message_deleted, message}, socket) do
+    {:noreply, stream_delete(socket, :messages, message)}
+  end
+
+  # Components
   attr :rooms, :list, required: true
   attr :current_room, Room, required: true
 
@@ -47,7 +120,6 @@ defmodule SlaxWeb.ChatRoomLive do
     """
   end
 
-  # Room header component
   attr :room, Room, required: true
   attr :hide_topic?, :boolean, required: true
 
@@ -74,7 +146,6 @@ defmodule SlaxWeb.ChatRoomLive do
     """
   end
 
-  # Message form component
   attr :room, Room, required: true
   attr :form, :any, required: true
 
@@ -105,7 +176,6 @@ defmodule SlaxWeb.ChatRoomLive do
     """
   end
 
-  # Room link component
   attr :active, :boolean, required: true
   attr :room, Room, required: true
 
@@ -126,7 +196,6 @@ defmodule SlaxWeb.ChatRoomLive do
     """
   end
 
-  # Message component
   attr :current_user, User, required: true
   attr :dom_id, :string, required: true
   attr :message, Message, required: true
@@ -158,75 +227,9 @@ defmodule SlaxWeb.ChatRoomLive do
     """
   end
 
+  # Private helper functions
   defp username(user) do
     user.email |> String.split("@") |> List.first() |> String.capitalize()
-  end
-
-  def mount(_params, _session, socket) do
-    if connected?(socket) do
-      Phoenix.PubSub.subscribe(Slax.PubSub, "chat_rooms")
-    end
-
-    rooms = Chat.list_rooms()
-
-    {:ok,
-     socket
-     |> stream_configure(:messages, dom_id: &"message-#{&1.id}")
-     |> stream(:messages, [])
-     |> assign(rooms: rooms)
-     |> assign_message_form(Chat.change_message(%Message{}))}
-  end
-
-  def handle_params(params, _session, socket) do
-    room = fetch_room(params)
-    messages = Chat.list_messages_in_room(room)
-
-    {:noreply,
-     socket
-     |> assign(
-       hide_topic?: false,
-       page_title: "#" <> room.name,
-       room: room
-     )
-     |> stream(:messages, messages, reset: true)
-     |> assign_message_form(Chat.change_message(%Message{}))}
-  end
-
-  # Grouped handle_event/3 clauses
-  def handle_event("submit-message", %{"message" => message_params}, socket) do
-    %{current_user: current_user, room: room} = socket.assigns
-
-    socket =
-      case Chat.create_message(room, message_params, current_user) do
-        {:ok, message} ->
-          socket
-          |> stream_insert(:messages, message)
-          |> assign_message_form(Chat.change_message(%Message{}))
-
-        {:error, changeset} ->
-          assign_message_form(socket, changeset)
-      end
-
-    {:noreply, socket}
-  end
-
-  def handle_event("validate-message", %{"message" => message_params}, socket) do
-    changeset = Chat.change_message(%Message{}, message_params)
-    {:noreply, assign_message_form(socket, changeset)}
-  end
-
-  def handle_event("toggle-topic", _params, socket) do
-    {:noreply, update(socket, :hide_topic?, &(!&1))}
-  end
-
-  def handle_event("delete-message", %{"id" => id}, socket) do
-    {:ok, message} = Chat.delete_message_by_id(id, socket.assigns.current_user)
-
-    {:noreply, stream_delete(socket, :messages, message)}
-  end
-
-  def handle_info({:new_message, message}, socket) do
-    {:noreply, stream_insert(socket, :messages, message)}
   end
 
   defp assign_message_form(socket, changeset) do
