@@ -41,24 +41,26 @@ defmodule SlaxWeb.Profiles.ProfileSettingsLive do
     """
   end
 
-  def mount(%{"username" => username}, _session, socket) do
-    case Accounts.get_user_by_username(username) do
-      nil ->
-        {:ok,
-         socket
-         |> put_flash(:error, "User not found")
-         |> push_navigate(to: ~p"/")}
+  on_mount {SlaxWeb.UserAuth, :ensure_authenticated}
 
-      user ->
+  def mount(%{"username" => username}, _session, socket) do
+    current_user = socket.assigns.current_user
+
+    case Accounts.get_user_by_username(username) do
+      %User{id: user_id} = user when user_id == current_user.id ->
         changeset = User.profile_changeset(user, %{})
 
-        socket =
-          socket
-          |> assign(:page_title, "Edit Profile")
-          |> assign(:user, user)
-          |> assign_form(changeset)
+        {:ok,
+         socket
+         |> assign(:page_title, "Edit Profile")
+         |> assign(:user, user)
+         |> assign_form(changeset)}
 
-        {:ok, socket}
+      _ ->
+        {:ok,
+         socket
+         |> put_flash(:error, "You can only edit your own profile")
+         |> push_navigate(to: ~p"/profiles/#{username}")}
     end
   end
 
@@ -72,15 +74,24 @@ defmodule SlaxWeb.Profiles.ProfileSettingsLive do
   end
 
   def handle_event("save-profile", %{"user" => user_params}, socket) do
-    case Accounts.update_user_profile(socket.assigns.user, user_params) do
-      {:ok, user} ->
+    current_user = socket.assigns.current_user
+    user = socket.assigns.user
+
+    case Accounts.update_user_profile(current_user, user, user_params) do
+      {:ok, updated_user} ->
         {:noreply,
          socket
          |> put_flash(:info, "Profile updated successfully")
-         |> push_navigate(to: ~p"/profiles/#{user.username}")}
+         |> push_navigate(to: ~p"/profiles/#{updated_user.username}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
+
+      {:error, :unauthorized} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "You are not authorized to edit this profile")
+         |> push_navigate(to: ~p"/profiles/#{user.username}")}
     end
   end
 

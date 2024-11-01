@@ -30,10 +30,14 @@ defmodule Slax.Accounts do
     Repo.get_by(User, username: username)
   end
 
-  def update_user_profile(%User{} = user, attrs) do
-    user
-    |> User.profile_changeset(attrs)
-    |> Repo.update()
+  def update_user_profile(%User{} = current_user, %User{id: user_id} = user, attrs) do
+    if current_user.id == user_id do
+      user
+      |> User.profile_changeset(attrs)
+      |> Repo.update()
+    else
+      {:error, :unauthorized}
+    end
   end
 
   ## User registration

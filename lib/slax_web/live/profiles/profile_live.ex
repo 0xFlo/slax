@@ -28,12 +28,14 @@ defmodule SlaxWeb.Profiles.ProfileLive do
             <div class="flex-1">
               <h1 class="text-sm font-bold leading-none">
                 @<%= @user.username %>
-                <.link
-                  class="font-normal text-xs text-blue-600 hover:text-blue-700"
-                  navigate={~p"/profiles/#{@user.username}/edit"}
-                >
-                  Edit
-                </.link>
+                <%= if @current_user && @current_user.id == @user.id do %>
+                  <.link
+                    class="font-normal text-xs text-blue-600 hover:text-blue-700"
+                    navigate={~p"/profiles/#{@user.username}/edit"}
+                  >
+                    Edit
+                  </.link>
+                <% end %>
               </h1>
             </div>
           </div>

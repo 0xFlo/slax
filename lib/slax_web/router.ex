@@ -17,13 +17,13 @@ defmodule SlaxWeb.Router do
     plug :accepts, ["json"]
   end
 
-  # Unprotected routes that don't require authentication
+  # Public routes
   scope "/", SlaxWeb do
     pipe_through :browser
 
-    # Public profile viewing
-    live_session :public_profiles,
+    live_session :public,
       on_mount: [{SlaxWeb.UserAuth, :mount_current_user}] do
+      # Public profile viewing
       live "/profiles", UserListLive, :index
       live "/profiles/:username", Profiles.ProfileLive, :show
     end
@@ -38,25 +38,33 @@ defmodule SlaxWeb.Router do
     delete "/users/log_out", UserSessionController, :delete
   end
 
-  # Routes that require authentication
+  # Routes that require authentication but no specific user
   scope "/", SlaxWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    live_session :authenticated,
+    live_session :authenticated_general,
       on_mount: [{SlaxWeb.UserAuth, :ensure_authenticated}] do
-      # Chat rooms - now protected
+      # Chat rooms
       live "/", ChatRoomLive, :index
       live "/rooms/:id", ChatRoomLive, :show
       live "/rooms/:id/edit", ChatRoomLive.Edit, :edit
+    end
+  end
 
-      # User settings and profile management
+  # Routes that require authentication AND specific user verification
+  scope "/", SlaxWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :authenticated_user_specific,
+      on_mount: [{SlaxWeb.UserAuth, :ensure_authenticated}] do
+      # User-specific routes
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
       live "/profiles/:username/edit", Profiles.ProfileSettingsLive, :edit
     end
   end
 
-  # Routes accessible only to non-authenticated users
+  # Login/registration routes
   scope "/", SlaxWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
