@@ -26,6 +26,12 @@ defmodule Slax.Accounts.User do
     field :location, :string
     field :website, :string
 
+    # social profile fields
+    field :github_handle, :string
+    field :twitter_handle, :string
+    field :linkedin_url, :string
+    field :mastodon_handle, :string
+
     timestamps(type: :utc_datetime)
   end
 
@@ -40,7 +46,15 @@ defmodule Slax.Accounts.User do
 
   def profile_changeset(user, attributes) do
     user
-    |> cast(attributes, [:bio, :location, :website])
+    |> cast(attributes, [
+      :bio,
+      :location,
+      :website,
+      :github_handle,
+      :twitter_handle,
+      :linkedin_url,
+      :mastodon_handle
+    ])
     |> validate_length(:bio, max: @maximum_bio_length)
     |> validate_length(:location, max: @maximum_location_length)
     |> validate_length(:website, max: @maximum_website_length)
@@ -219,7 +233,15 @@ defmodule Slax.Accounts.User do
   defp is_empty_string?(_), do: false
 
   defp remove_whitespace_from_profile_fields(changeset) do
-    profile_fields = [:bio, :location, :website]
+    profile_fields = [
+      :bio,
+      :location,
+      :website,
+      :github_handle,
+      :twitter_handle,
+      :linkedin_url,
+      :mastodon_handle
+    ]
 
     Enum.reduce(profile_fields, changeset, fn field, current_changeset ->
       if value = get_change(current_changeset, field) do

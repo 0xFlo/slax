@@ -55,19 +55,70 @@ defmodule SlaxWeb.Profiles.ProfileLive do
               </div>
             <% end %>
 
-            <%= if @user.website && @user.website != "" do %>
-              <div>
-                <h2 class="text-sm font-semibold text-gray-500 mb-1">Website</h2>
-                <a
-                  href={@user.website}
-                  class="text-blue-600 hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <%= @user.website %>
-                </a>
+            <div class="border-t border-gray-200 pt-4">
+              <h2 class="text-sm font-semibold text-gray-500 mb-2">Links</h2>
+              <div class="flex flex-wrap gap-3">
+                <%= if @user.website && @user.website != "" do %>
+                  <a
+                    href={@user.website}
+                    class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <.icon name="hero-globe-alt" class="h-4 w-4" />
+                    <span>Website</span>
+                  </a>
+                <% end %>
+
+                <%= if @user.github_handle && @user.github_handle != "" do %>
+                  <a
+                    href={"https://github.com/#{@user.github_handle}"}
+                    class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <.icon name="hero-code-bracket" class="h-4 w-4" />
+                    <span>GitHub</span>
+                  </a>
+                <% end %>
+
+                <%= if @user.twitter_handle && @user.twitter_handle != "" do %>
+                  <a
+                    href={"https://twitter.com/#{@user.twitter_handle}"}
+                    class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <.icon name="hero-chat-bubble-left-ellipsis" class="h-4 w-4" />
+                    <span>Twitter</span>
+                  </a>
+                <% end %>
+
+                <%= if @user.linkedin_url && @user.linkedin_url != "" do %>
+                  <a
+                    href={@user.linkedin_url}
+                    class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <.icon name="hero-briefcase" class="h-4 w-4" />
+                    <span>LinkedIn</span>
+                  </a>
+                <% end %>
+
+                <%= if @user.mastodon_handle && @user.mastodon_handle != "" do %>
+                  <a
+                    href={"https://#{@user.mastodon_handle}"}
+                    class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <.icon name="hero-chat-bubble-left-right" class="h-4 w-4" />
+                    <span>Mastodon</span>
+                  </a>
+                <% end %>
               </div>
-            <% end %>
+            </div>
           </div>
         </div>
       <% else %>

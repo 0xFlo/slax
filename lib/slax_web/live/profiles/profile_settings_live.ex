@@ -29,6 +29,43 @@ defmodule SlaxWeb.Profiles.ProfileSettingsLive do
         <.input field={@form[:bio]} type="textarea" label="Bio" phx-debounce="blur" />
         <.input field={@form[:location]} type="text" label="Location" phx-debounce="blur" />
         <.input field={@form[:website]} type="url" label="Website" phx-debounce="blur" />
+
+        <div class="space-y-4 border-t border-gray-200 pt-4 mt-4">
+          <h3 class="text-lg font-medium">Social Profiles</h3>
+
+          <.input
+            field={@form[:github_handle]}
+            type="text"
+            label="GitHub Username"
+            placeholder="username"
+            phx-debounce="blur"
+          />
+
+          <.input
+            field={@form[:twitter_handle]}
+            type="text"
+            label="Twitter Username"
+            placeholder="username (without @)"
+            phx-debounce="blur"
+          />
+
+          <.input
+            field={@form[:linkedin_url]}
+            type="url"
+            label="LinkedIn Profile URL"
+            placeholder="https://www.linkedin.com/in/your-profile"
+            phx-debounce="blur"
+          />
+
+          <.input
+            field={@form[:mastodon_handle]}
+            type="text"
+            label="Mastodon Handle"
+            placeholder="@username@instance.social"
+            phx-debounce="blur"
+          />
+        </div>
+
         <:actions>
           <.button phx-disable-with="Saving..." class="w-full">
             Save Changes
