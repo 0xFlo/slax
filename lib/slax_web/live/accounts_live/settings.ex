@@ -1,4 +1,4 @@
-defmodule SlaxWeb.UserSettingsLive do
+defmodule SlaxWeb.AccountsLive.Settings do
   use SlaxWeb, :live_view
 
   alias Slax.Accounts

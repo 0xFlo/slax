@@ -24,7 +24,7 @@ defmodule SlaxWeb.Router do
     live_session :public,
       on_mount: [{SlaxWeb.UserAuth, :mount_current_user}] do
       # Public profile viewing
-      live "/profiles", UserListLive, :index
+      live "/profiles", AccountsLive.List, :index
       live "/profiles/:username", Profiles.ProfileLive, :show
       get "/home", PageController, :home
     end
@@ -32,8 +32,8 @@ defmodule SlaxWeb.Router do
     # Account confirmation routes
     live_session :account_confirmation,
       on_mount: [{SlaxWeb.UserAuth, :mount_current_user}] do
-      live "/users/confirm/:token", UserConfirmationLive, :edit
-      live "/users/confirm", UserConfirmationInstructionsLive, :new
+      live "/users/confirm/:token", AccountsLive.Confirmation, :edit
+      live "/users/confirm", AccountsLive.ConfirmationInstructions, :new
     end
 
     delete "/users/log_out", UserSessionController, :delete
@@ -62,9 +62,9 @@ defmodule SlaxWeb.Router do
     live_session :authenticated_user_specific,
       on_mount: [{SlaxWeb.UserAuth, :ensure_authenticated}] do
       # User-specific routes
-      live "/users/settings", UserSettingsLive, :edit
-      live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
-      live "/profiles/:username/edit", Profiles.ProfileSettingsLive, :edit
+      live "/users/settings", AccountsLive.Settings, :edit
+      live "/users/settings/confirm_email/:token", AccountsLive.Settings, :confirm_email
+      live "/profiles/:username/edit", AccountsLive.ProfileSettings, :edit
     end
   end
 
@@ -74,10 +74,10 @@ defmodule SlaxWeb.Router do
 
     live_session :unauthenticated,
       on_mount: [{SlaxWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      live "/users/register", UserRegistrationLive, :new
-      live "/users/log_in", UserLoginLive, :new
-      live "/users/reset_password", UserForgotPasswordLive, :new
-      live "/users/reset_password/:token", UserResetPasswordLive, :edit
+      live "/users/register", AccountsLive.Registration, :new
+      live "/users/log_in", AccountsLive.Login, :new
+      live "/users/reset_password", AccountsLive.ForgotPassword, :new
+      live "/users/reset_password/:token", AccountsLive.ResetPassword, :edit
     end
 
     post "/users/log_in", UserSessionController, :create
