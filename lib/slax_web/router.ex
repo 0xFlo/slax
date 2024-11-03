@@ -47,6 +47,7 @@ defmodule SlaxWeb.Router do
       on_mount: [{SlaxWeb.UserAuth, :ensure_authenticated}] do
       # Chat rooms
       live "/", ChatRoomLive, :index
+      live "/rooms", ChatRoomLive.Index
       live "/rooms/:id", ChatRoomLive, :show
       live "/rooms/:id/edit", ChatRoomLive.Edit, :edit
     end
