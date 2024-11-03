@@ -22,7 +22,7 @@ defmodule SlaxWeb.CircleLive.New do
 
   def handle_event("save", %{"circle" => circle_params}, socket) do
     case Circles.create_circle(socket.assigns.current_user, circle_params) do
-      {:ok, circle} ->
+      {:ok, _circle} ->
         {:noreply,
          socket
          |> put_flash(:info, "Circle created successfully!")

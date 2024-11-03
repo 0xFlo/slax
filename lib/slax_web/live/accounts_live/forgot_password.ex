@@ -32,7 +32,8 @@ defmodule SlaxWeb.AccountsLive.ForgotPassword do
   end
 
   def handle_event("send_email", %{"user" => %{"email" => email}}, socket) do
-    if user = Accounts.get_user_by_email(email) do
+    # Use email as both email and username since we're coming from password reset
+    if user = Accounts.get_authenticated_user(email, "") do
       Accounts.deliver_user_reset_password_instructions(
         user,
         &url(~p"/users/reset_password/#{&1}")
