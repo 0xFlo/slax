@@ -50,6 +50,8 @@ defmodule SlaxWeb.Router do
       live "/rooms", ChatRoomLive.Index
       live "/rooms/:id", ChatRoomLive, :show
       live "/rooms/:id/edit", ChatRoomLive.Edit, :edit
+
+      live "/circles/new", CircleLive.New, :new
     end
   end
 
