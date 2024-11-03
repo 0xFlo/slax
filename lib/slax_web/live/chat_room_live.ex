@@ -12,7 +12,35 @@ defmodule SlaxWeb.ChatRoomLive do
     <div class="flex h-screen">
       <.sidebar rooms={@rooms} current_room={@room} users={@users} online_users={@online_users} />
       <div class="flex flex-col flex-grow shadow-lg h-full">
-        <.room_header room={@room} hide_topic?={@hide_topic?} />
+        <.room_header room={@room} hide_topic?={@hide_topic?} joined?={@joined?} />
+        <div
+          :if={!@joined?}
+          class="flex justify-around mx-5 mb-5 p-6 bg-slate-100 border-slate-300 border rounded-lg"
+        >
+          <div class="max-w-3-xl text-center">
+            <div class="mb-4">
+              <h1 class="text-xl font-semibold">#<%= @room.name %></h1>
+              <p :if={@room.topic} class="text-sm mt-1 text-gray-600"><%= @room.topic %></p>
+            </div>
+            <div class="flex items-center justify-around">
+              <button
+                phx-click="join-room"
+                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                Join Room
+              </button>
+            </div>
+            <div class="mt-4">
+              <.link
+                navigate={~p"/rooms"}
+                href="#"
+                class="text-sm text-slate-500 underline hover:text-slate-600"
+              >
+                Back to All Rooms
+              </.link>
+            </div>
+          </div>
+        </div>
         <div
           id="room-messages"
           class="flex flex-col flex-grow overflow-y-auto h-full"
@@ -26,7 +54,7 @@ defmodule SlaxWeb.ChatRoomLive do
             message={message}
           />
         </div>
-        <.message_form room={@room} form={@new_message_form} />
+        <.message_form room={@room} form={@new_message_form} joined?={@joined?} />
       </div>
     </div>
     <.modal id="new-room-modal">
@@ -52,7 +80,6 @@ defmodule SlaxWeb.ChatRoomLive do
     users = Accounts.list_users()
 
     if connected?(socket) do
-      # Add missing closing parenthesis here
       Phoenix.PubSub.subscribe(Slax.PubSub, "chat_rooms")
       OnlineUsers.track(self(), socket.assigns.current_user)
     end
@@ -66,6 +93,7 @@ defmodule SlaxWeb.ChatRoomLive do
      |> assign(rooms: rooms)
      |> assign(users: users)
      |> assign(online_users: OnlineUsers.list())
+     |> assign(joined?: false)
      |> assign_room_form(Chat.change_room(%Room{}))
      |> assign_message_form(Chat.change_message(%Message{}))
      |> push_event("scroll_messages_to_bottom", %{})}
@@ -77,13 +105,17 @@ defmodule SlaxWeb.ChatRoomLive do
     room = fetch_room(params)
     messages = Chat.list_messages_in_room(room)
 
+    # Get the joined? status
+    joined? = Chat.joined?(room, socket.assigns.current_user)
+
     Chat.subscribe_to_room(room)
 
     {:noreply,
      socket
      |> assign(
        hide_topic?: false,
-       joined?: Chat.joined?(room, socket.assigns.current_user),
+       # Add this line
+       joined?: joined?,
        page_title: "#" <> room.name,
        room: room
      )
@@ -108,6 +140,19 @@ defmodule SlaxWeb.ChatRoomLive do
         socket
       end
 
+    {:noreply, socket}
+  end
+
+  def handle_event("join-room", _, socket) do
+    current_user = socket.assigns.current_user
+    Chat.join_room!(socket.assigns.room, current_user)
+    Chat.subscribe_to_room(socket.assigns.room)
+    socket = assign(socket, joined?: true, rooms: Chat.list_joined_rooms(current_user))
+    {:noreply, socket}
+  end
+
+  def handle_event("delete-message", %{"id" => id}, socket) do
+    Chat.delete_message_by_id(id, socket.assigns.current_user)
     {:noreply, socket}
   end
 
@@ -142,11 +187,6 @@ defmodule SlaxWeb.ChatRoomLive do
 
   def handle_event("toggle-topic", _params, socket) do
     {:noreply, update(socket, :hide_topic?, &(!&1))}
-  end
-
-  def handle_event("delete-message", %{"id" => id}, socket) do
-    Chat.delete_message_by_id(id, socket.assigns.current_user)
-    {:noreply, socket}
   end
 
   def handle_info({:new_message, message}, socket) do
@@ -263,6 +303,7 @@ defmodule SlaxWeb.ChatRoomLive do
 
   attr :room, Room, required: true
   attr :hide_topic?, :boolean, required: true
+  attr :joined?, :boolean, required: true
 
   defp room_header(assigns) do
     ~H"""
@@ -270,6 +311,7 @@ defmodule SlaxWeb.ChatRoomLive do
       <h1 class="text-sm font-bold leading-none">
         #<%= @room.name %>
         <.link
+          :if={@joined?}
           class="font-normal text-xs text-blue-600 hover:text-blue-700"
           navigate={~p"/rooms/#{@room}/edit"}
         >
@@ -289,6 +331,8 @@ defmodule SlaxWeb.ChatRoomLive do
 
   attr :room, Room, required: true
   attr :form, :any, required: true
+  # Add this line
+  attr :joined?, :boolean, required: true
 
   def message_form(assigns) do
     ~H"""
