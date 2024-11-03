@@ -7,11 +7,17 @@ defmodule SlaxWeb.ChatRoomLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex h-full">
+    <div class="flex h-screen">
+      <!-- Ensures the entire app container uses full height -->
       <.sidebar rooms={@rooms} current_room={@room} />
-      <div class="flex flex-col flex-grow shadow-lg">
+      <div class="flex flex-col flex-grow shadow-lg h-full">
         <.room_header room={@room} hide_topic?={@hide_topic?} />
-        <div id="room-messages" class="flex flex-col flex-grow overflow-auto" phx-update="stream">
+        <div
+          id="room-messages"
+          class="flex flex-col flex-grow overflow-y-auto h-full"
+          phx-hook="RoomMessages"
+          phx-update="stream"
+        >
           <.message
             :for={{dom_id, message} <- @streams.messages}
             current_user={@current_user}
@@ -37,7 +43,8 @@ defmodule SlaxWeb.ChatRoomLive do
      |> stream_configure(:messages, dom_id: &"message-#{&1.id}")
      |> stream(:messages, [])
      |> assign(rooms: rooms)
-     |> assign_message_form(Chat.change_message(%Message{}))}
+     |> assign_message_form(Chat.change_message(%Message{}))
+     |> push_event("scroll_messages_to_bottom", %{})}
   end
 
   def handle_params(params, _session, socket) do
@@ -91,7 +98,12 @@ defmodule SlaxWeb.ChatRoomLive do
 
   # Group all handle_info/2 clauses together
   def handle_info({:new_message, message}, socket) do
-    {:noreply, stream_insert(socket, :messages, message)}
+    socket =
+      socket
+      |> stream_insert(:messages, message)
+      |> push_event("scroll_messages_to_bottom", %{})
+
+    {:noreply, socket}
   end
 
   def handle_info({:message_deleted, message}, socket) do
@@ -164,8 +176,9 @@ defmodule SlaxWeb.ChatRoomLive do
           cols=""
           id="chat-message-textarea"
           name={@form[:body].name}
-          placeholder={"Message ##{@room.name}"}
           phx-debounce
+          phx-hook="ChatMessageTextarea"
+          placeholder={"Message ##{@room.name}"}
           rows="1"
         ><%= Phoenix.HTML.Form.normalize_value("textarea", @form[:body].value) %></textarea>
         <button class="flex-shrink flex items-center justify-center h-6 w-6 rounded hover:bg-slate-200">
