@@ -7,10 +7,6 @@ defmodule Slax.Accounts do
   alias Slax.Repo
   alias Slax.Accounts.{User, UserToken, UserNotifier}
 
-  def list_users do
-    Repo.all(User)
-  end
-
   ## Database getters
 
   def get_authenticated_user(email_or_username, password)
@@ -37,6 +33,10 @@ defmodule Slax.Accounts do
     else
       {:error, :unauthorized}
     end
+  end
+
+  def list_users() do
+    Repo.all(from u in User, order_by: [asc: u.email])
   end
 
   ## User registration

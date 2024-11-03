@@ -26,6 +26,7 @@ defmodule SlaxWeb.Router do
       # Public profile viewing
       live "/profiles", UserListLive, :index
       live "/profiles/:username", Profiles.ProfileLive, :show
+      get "/home", PageController, :home
     end
 
     # Account confirmation routes
