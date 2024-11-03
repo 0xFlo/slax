@@ -1,4 +1,4 @@
-defmodule SlaxWeb.UserListLive do
+defmodule SlaxWeb.AccountsLive.List do
   use SlaxWeb, :live_view
   alias Slax.Repo
   alias Slax.Accounts.User

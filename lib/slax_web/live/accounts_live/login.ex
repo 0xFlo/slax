@@ -1,4 +1,4 @@
-defmodule SlaxWeb.UserLoginLive do
+defmodule SlaxWeb.AccountsLive.Login do
   use SlaxWeb, :live_view
 
   def render(assigns) do

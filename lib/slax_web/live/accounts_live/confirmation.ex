@@ -1,4 +1,4 @@
-defmodule SlaxWeb.UserConfirmationLive do
+defmodule SlaxWeb.AccountsLive.Confirmation do
   use SlaxWeb, :live_view
 
   alias Slax.Accounts

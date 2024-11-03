@@ -1,4 +1,4 @@
-defmodule SlaxWeb.UserResetPasswordLive do
+defmodule SlaxWeb.AccountsLive.ResetPassword do
   use SlaxWeb, :live_view
 
   alias Slax.Accounts
