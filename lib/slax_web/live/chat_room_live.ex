@@ -48,7 +48,7 @@ defmodule SlaxWeb.ChatRoomLive do
   end
 
   def mount(_params, _session, socket) do
-    rooms = Chat.list_rooms()
+    rooms = Chat.list_joined_rooms(socket.assigns.current_user)
     users = Accounts.list_users()
 
     if connected?(socket) do
@@ -83,6 +83,7 @@ defmodule SlaxWeb.ChatRoomLive do
      socket
      |> assign(
        hide_topic?: false,
+       joined?: Chat.joined?(room, socket.assigns.current_user),
        page_title: "#" <> room.name,
        room: room
      )
@@ -95,12 +96,16 @@ defmodule SlaxWeb.ChatRoomLive do
     %{current_user: current_user, room: room} = socket.assigns
 
     socket =
-      case Chat.create_message(room, message_params, current_user) do
-        {:ok, _message} ->
-          assign_message_form(socket, Chat.change_message(%Message{}))
+      if Chat.joined?(room, current_user) do
+        case Chat.create_message(room, message_params, current_user) do
+          {:ok, _message} ->
+            assign_message_form(socket, Chat.change_message(%Message{}))
 
-        {:error, changeset} ->
-          assign_message_form(socket, changeset)
+          {:error, changeset} ->
+            assign_message_form(socket, changeset)
+        end
+      else
+        socket
       end
 
     {:noreply, socket}
@@ -287,7 +292,7 @@ defmodule SlaxWeb.ChatRoomLive do
 
   def message_form(assigns) do
     ~H"""
-    <div class="h-12 bg-white px-4 pb-4">
+    <div :if={@joined?} class="h-12 bg-white px-4 pb-4">
       <.form
         id="new-message-form"
         for={@form}
