@@ -13,15 +13,14 @@ defmodule Slax.Accounts do
 
   ## Database getters
 
-  def get_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, email: email)
-  end
+  def get_authenticated_user(email_or_username, password)
+      when is_binary(email_or_username) and is_binary(password) do
+    user =
+      User
+      |> where([u], u.email == ^email_or_username or u.username == ^email_or_username)
+      |> Repo.one()
 
-  def get_user_by_email_and_password(email, password)
-      when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, email: email)
-    # Changed from valid_password?
-    if User.password_matches?(user, password), do: user
+    if User.valid_password?(user, password), do: user
   end
 
   def get_user!(id), do: Repo.get!(User, id)

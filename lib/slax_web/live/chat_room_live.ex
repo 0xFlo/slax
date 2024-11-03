@@ -8,7 +8,6 @@ defmodule SlaxWeb.ChatRoomLive do
   def render(assigns) do
     ~H"""
     <div class="flex h-screen">
-      <!-- Ensures the entire app container uses full height -->
       <.sidebar rooms={@rooms} current_room={@room} />
       <div class="flex flex-col flex-grow shadow-lg h-full">
         <.room_header room={@room} hide_topic?={@hide_topic?} />
@@ -228,8 +227,11 @@ defmodule SlaxWeb.ChatRoomLive do
       <div class="h-10 w-10 rounded flex-shrink-0 bg-slate-300"></div>
       <div class="ml-2">
         <div class="-mt-1">
-          <.link class="text-sm font-semibold hover:underline">
-            <span><%= username(@message.user) %></span>
+          <.link
+            navigate={~p"/profiles/#{@message.user.username}"}
+            class="text-sm font-semibold hover:underline"
+          >
+            @<%= @message.user.username %>
           </.link>
           <span class="ml-1 text-xs text-gray-500"><%= message_timestamp(@message) %></span>
 
@@ -241,9 +243,6 @@ defmodule SlaxWeb.ChatRoomLive do
   end
 
   # Private helper functions
-  defp username(user) do
-    user.email |> String.split("@") |> List.first() |> String.capitalize()
-  end
 
   defp assign_message_form(socket, changeset) do
     assign(socket, :new_message_form, to_form(changeset))

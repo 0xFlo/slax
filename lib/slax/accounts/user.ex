@@ -15,7 +15,7 @@ defmodule Slax.Accounts.User do
   @maximum_website_length 255
 
   schema "users" do
-    field :email, :string
+    field :email, :string, redact: true
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
@@ -91,19 +91,19 @@ defmodule Slax.Accounts.User do
   end
 
   def validate_current_password(changeset, provided_password) do
-    if password_matches?(changeset.data, provided_password) do
+    if valid_password?(changeset.data, provided_password) do
       changeset
     else
       add_error(changeset, :current_password, "is not valid")
     end
   end
 
-  def password_matches?(%__MODULE__{hashed_password: hashed_password}, password)
+  def valid_password?(%Slax.Accounts.User{hashed_password: hashed_password}, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
     Bcrypt.verify_pass(password, hashed_password)
   end
 
-  def password_matches?(_, _) do
+  def valid_password?(_, _) do
     Bcrypt.no_user_verify()
     false
   end
