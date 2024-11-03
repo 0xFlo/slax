@@ -1,6 +1,7 @@
 defmodule Slax.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Slax.Chat.{Room, RoomMembership}
 
   alias Slax.Repo
 
@@ -18,8 +19,8 @@ defmodule Slax.Accounts.User do
     field :email, :string, redact: true
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
-    field :confirmed_at, :utc_datetime
     field :current_password, :string, virtual: true, redact: true
+    field :confirmed_at, :utc_datetime
 
     field :username, :string
     field :bio, :string
@@ -31,6 +32,8 @@ defmodule Slax.Accounts.User do
     field :twitter_handle, :string
     field :linkedin_url, :string
     field :mastodon_handle, :string
+
+    many_to_many :rooms, Room, join_through: RoomMembership
 
     timestamps(type: :utc_datetime)
   end
