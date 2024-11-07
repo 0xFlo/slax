@@ -1,4 +1,4 @@
-defmodule SlaxWeb.AccountsLive.ProfileSettings do
+defmodule SlaxWeb.Live.Users.ProfileSettings do
   use SlaxWeb, :live_view
 
   alias Slax.Accounts
@@ -213,7 +213,7 @@ defmodule SlaxWeb.AccountsLive.ProfileSettings do
     """
   end
 
-  on_mount {SlaxWeb.UserAuth, :ensure_authenticated}
+  on_mount {SlaxWeb.Live.Auth.UserAuth, :ensure_authenticated}
 
   def mount(%{"username" => username}, _session, socket) do
     current_user = socket.assigns.current_user

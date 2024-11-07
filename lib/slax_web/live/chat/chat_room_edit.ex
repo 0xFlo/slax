@@ -1,5 +1,4 @@
-# lib/slax_web/live/chat_room_live/edit.ex
-defmodule SlaxWeb.ChatRoomLive.Edit do
+defmodule SlaxWeb.Live.Chat.ChatRoomEdit do
   use SlaxWeb, :live_view
 
   alias Slax.Chat

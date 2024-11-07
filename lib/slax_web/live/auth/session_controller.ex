@@ -1,8 +1,9 @@
-defmodule SlaxWeb.UserSessionController do
+defmodule SlaxWeb.Live.Auth.SessionController do
   use SlaxWeb, :controller
 
   alias Slax.Accounts
-  alias SlaxWeb.UserAuth
+  # Update to the new path
+  alias SlaxWeb.Live.Auth.UserAuth
 
   def create(conn, %{"_action" => "registered"} = params) do
     params = put_in(params, ["user", "email_or_username"], params["user"]["email"])
@@ -27,7 +28,6 @@ defmodule SlaxWeb.UserSessionController do
       |> put_flash(:info, info)
       |> UserAuth.log_in_user(user, user_params)
     else
-      # In order to prevent user enumeration attacks, don't disclose whether the email or username is registered.
       conn
       |> put_flash(:error, "Invalid login")
       |> put_flash(:email_or_username, String.slice(email_or_username, 0, 160))

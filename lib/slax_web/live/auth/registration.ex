@@ -1,4 +1,4 @@
-defmodule SlaxWeb.AccountsLive.Registration do
+defmodule SlaxWeb.Live.Auth.Registration do
   use SlaxWeb, :live_view
 
   alias Slax.Accounts

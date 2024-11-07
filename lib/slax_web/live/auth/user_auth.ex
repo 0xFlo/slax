@@ -1,4 +1,4 @@
-defmodule SlaxWeb.UserAuth do
+defmodule SlaxWeb.Live.Auth.UserAuth do
   use SlaxWeb, :verified_routes
 
   import Plug.Conn

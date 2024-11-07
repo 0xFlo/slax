@@ -1,4 +1,4 @@
-defmodule SlaxWeb.OnlineUsers do
+defmodule SlaxWeb.Live.Users.OnlineUsers do
   alias SlaxWeb.Presence
 
   @topic "online_users"

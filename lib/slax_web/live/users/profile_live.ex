@@ -1,4 +1,4 @@
-defmodule SlaxWeb.Profiles.ProfileLive do
+defmodule SlaxWeb.Live.Users.ProfileLive do
   use SlaxWeb, :live_view
   alias Slax.Accounts
   alias Slax.Circles

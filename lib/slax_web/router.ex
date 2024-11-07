@@ -1,7 +1,7 @@
 defmodule SlaxWeb.Router do
   use SlaxWeb, :router
 
-  import SlaxWeb.UserAuth
+  import SlaxWeb.Live.Auth.UserAuth
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -22,7 +22,7 @@ defmodule SlaxWeb.Router do
     pipe_through :browser
 
     live_session :public,
-      on_mount: [{SlaxWeb.UserAuth, :mount_current_user}] do
+      on_mount: [{SlaxWeb.Live.Auth.UserAuth, :mount_current_user}] do
       # Public profile viewing
       live "/profiles", AccountsLive.List, :index
       live "/profiles/:username", Profiles.ProfileLive, :show
@@ -31,12 +31,12 @@ defmodule SlaxWeb.Router do
 
     # Account confirmation routes
     live_session :account_confirmation,
-      on_mount: [{SlaxWeb.UserAuth, :mount_current_user}] do
+      on_mount: [{SlaxWeb.Live.Auth.UserAuth, :mount_current_user}] do
       live "/users/confirm/:token", AccountsLive.Confirmation, :edit
       live "/users/confirm", AccountsLive.ConfirmationInstructions, :new
     end
 
-    delete "/users/log_out", UserSessionController, :delete
+    delete "/users/log_out", Live.Auth.SessionController, :delete
   end
 
   # Routes that require authentication but no specific user
@@ -44,7 +44,7 @@ defmodule SlaxWeb.Router do
     pipe_through [:browser, :require_authenticated_user]
 
     live_session :authenticated_general,
-      on_mount: [{SlaxWeb.UserAuth, :ensure_authenticated}] do
+      on_mount: [{SlaxWeb.Live.Auth.UserAuth, :ensure_authenticated}] do
       # Chat rooms
       live "/", ChatRoomLive, :index
       live "/rooms", ChatRoomLive.Index
@@ -60,7 +60,7 @@ defmodule SlaxWeb.Router do
     pipe_through [:browser, :require_authenticated_user]
 
     live_session :authenticated_user_specific,
-      on_mount: [{SlaxWeb.UserAuth, :ensure_authenticated}] do
+      on_mount: [{SlaxWeb.Live.Auth.UserAuth, :ensure_authenticated}] do
       # User-specific routes
       live "/users/settings", AccountsLive.Settings, :edit
       live "/users/settings/confirm_email/:token", AccountsLive.Settings, :confirm_email
@@ -73,14 +73,14 @@ defmodule SlaxWeb.Router do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
     live_session :unauthenticated,
-      on_mount: [{SlaxWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+      on_mount: [{SlaxWeb.Live.Auth.UserAuth, :redirect_if_user_is_authenticated}] do
       live "/users/register", AccountsLive.Registration, :new
       live "/users/log_in", AccountsLive.Login, :new
       live "/users/reset_password", AccountsLive.ForgotPassword, :new
       live "/users/reset_password/:token", AccountsLive.ResetPassword, :edit
     end
 
-    post "/users/log_in", UserSessionController, :create
+    post "/users/log_in", Live.Auth.SessionController, :create
   end
 
   # Development-only routes

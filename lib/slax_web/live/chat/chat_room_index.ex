@@ -1,5 +1,4 @@
-# lib/slax_web/live/chat_room_live/index.ex
-defmodule SlaxWeb.ChatRoomLive.Index do
+defmodule SlaxWeb.Live.Chat.ChatRoomIndex do
   use SlaxWeb, :live_view
 
   alias Slax.Chat

@@ -1,11 +1,11 @@
-defmodule SlaxWeb.ChatRoomLive do
+defmodule SlaxWeb.Live.Chat.ChatRoomLive do
   use SlaxWeb, :live_view
 
   alias Slax.Accounts
   alias Slax.Accounts.User
   alias Slax.Chat
   alias Slax.Chat.{Message, Room}
-  alias SlaxWeb.OnlineUsers
+  alias SlaxWeb.Live.Users.OnlineUsers
 
   def render(assigns) do
     ~H"""
