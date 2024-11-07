@@ -24,16 +24,16 @@ defmodule SlaxWeb.Router do
     live_session :public,
       on_mount: [{SlaxWeb.Live.Auth.UserAuth, :mount_current_user}] do
       # Public profile viewing
-      live "/profiles", AccountsLive.List, :index
-      live "/profiles/:username", Profiles.ProfileLive, :show
+      live "/profiles", Live.Users.ProfileList, :index
+      live "/profiles/:username", Live.Users.ProfileLive, :show
       get "/home", PageController, :home
     end
 
     # Account confirmation routes
     live_session :account_confirmation,
       on_mount: [{SlaxWeb.Live.Auth.UserAuth, :mount_current_user}] do
-      live "/users/confirm/:token", AccountsLive.Confirmation, :edit
-      live "/users/confirm", AccountsLive.ConfirmationInstructions, :new
+      live "/users/confirm/:token", Live.Auth.Confirmation, :edit
+      live "/users/confirm", Live.Auth.Confirmation, :new
     end
 
     delete "/users/log_out", Live.Auth.SessionController, :delete
@@ -46,12 +46,12 @@ defmodule SlaxWeb.Router do
     live_session :authenticated_general,
       on_mount: [{SlaxWeb.Live.Auth.UserAuth, :ensure_authenticated}] do
       # Chat rooms
-      live "/", ChatRoomLive, :index
-      live "/rooms", ChatRoomLive.Index
-      live "/rooms/:id", ChatRoomLive, :show
-      live "/rooms/:id/edit", ChatRoomLive.Edit, :edit
+      live "/", Live.Chat.ChatRoomLive, :index
+      live "/rooms", Live.Chat.ChatRoomIndex, :index
+      live "/rooms/:id", Live.Chat.ChatRoomLive, :show
+      live "/rooms/:id/edit", Live.Chat.ChatRoomEdit, :edit
 
-      live "/circles/new", CircleLive.New, :new
+      live "/circles/new", Live.Circles.New, :new
     end
   end
 
@@ -62,9 +62,9 @@ defmodule SlaxWeb.Router do
     live_session :authenticated_user_specific,
       on_mount: [{SlaxWeb.Live.Auth.UserAuth, :ensure_authenticated}] do
       # User-specific routes
-      live "/users/settings", AccountsLive.Settings, :edit
-      live "/users/settings/confirm_email/:token", AccountsLive.Settings, :confirm_email
-      live "/profiles/:username/edit", AccountsLive.ProfileSettings, :edit
+      live "/users/settings", Live.Users.AccountSettings, :edit
+      live "/users/settings/confirm_email/:token", Live.Users.AccountSettings, :confirm_email
+      live "/profiles/:username/edit", Live.Users.ProfileSettings, :edit
     end
   end
 
@@ -74,10 +74,10 @@ defmodule SlaxWeb.Router do
 
     live_session :unauthenticated,
       on_mount: [{SlaxWeb.Live.Auth.UserAuth, :redirect_if_user_is_authenticated}] do
-      live "/users/register", AccountsLive.Registration, :new
-      live "/users/log_in", AccountsLive.Login, :new
-      live "/users/reset_password", AccountsLive.ForgotPassword, :new
-      live "/users/reset_password/:token", AccountsLive.ResetPassword, :edit
+      live "/users/register", Live.Auth.Registration, :new
+      live "/users/log_in", Live.Auth.Login, :new
+      live "/users/reset_password", Live.Auth.ResetPassword, :new
+      live "/users/reset_password/:token", Live.Auth.ResetPassword, :edit
     end
 
     post "/users/log_in", Live.Auth.SessionController, :create
